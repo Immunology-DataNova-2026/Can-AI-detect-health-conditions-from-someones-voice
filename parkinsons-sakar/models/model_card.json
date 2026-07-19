@@ -6,5 +6,5 @@
   "output": "P(parkinsons); >=0.5 -> parkinsons",
   "honest_auc_speaker_independent": 0.83,
   "note": "Input must be the Sakar feature schema (jitter/shimmer/HNR/MFCC/TQWT). Extracting these from arbitrary audio requires the Sakar feature pipeline.",
-  "usage": "python 04_parkinsons_sakar/predict.py your_features.csv"
+  "usage": "python parkinsons-sakar/predict.py your_features.csv"
 }

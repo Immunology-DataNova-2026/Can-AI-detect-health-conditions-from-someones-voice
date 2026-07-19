@@ -5,6 +5,6 @@
   "input": "a 22-value feature vector in the UCI column order (see features in the .pkl)",
   "output": "P(parkinsons); >=0.5 -> parkinsons",
   "honest_auc_speaker_independent": 0.71,
-  "warning": "Corpus is very small (8 controls); estimate is unstable. Prefer ../04_parkinsons_sakar/.",
-  "usage": "python 03_parkinsons_small_uci/predict.py your_features.csv"
+  "warning": "Corpus is very small (8 controls); estimate is unstable. Prefer ../parkinsons-sakar/.",
+  "usage": "python parkinsons-oxford-uci/predict.py your_features.csv"
 }
