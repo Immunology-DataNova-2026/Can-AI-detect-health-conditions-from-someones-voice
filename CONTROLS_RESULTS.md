@@ -2,8 +2,8 @@
 
 Scope note: all three repos were available for this pass. The gene-expression
 repo was cloned from the org; the voice and antibody repos were already local.
-Per instruction, **nothing was committed to any repo in this pass** (see
-"Uncommitted state" at the bottom).
+All results below are committed and pushed — see "Where these live" at the
+bottom for which repo holds which artifact.
 
 Environment note: this machine has a TLS-intercepting proxy whose CA cert
 OpenSSL rejects ("Basic Constraints of CA cert not marked critical"). This broke
@@ -40,7 +40,7 @@ the random split scores higher, i.e. it flatters the model.
 - both arms use the same validation-set size (12,067) so the comparison is not confounded by evaluation-set size; Arm B is stratified by `label`.
 - reading: holding out entire antigens costs ~3.5 AUROC points versus a random split. That is a **real but modest** inflation — notably smaller than the gene study's selection-leakage effect (+4.8 AUC) and far smaller than the voice study's recording-level leakage (+12 AUC). The honest interpretation is that this model generalizes to unseen antigens better than a "leakage is catastrophic" narrative would predict, and Arm A's 0.9065 on three genuinely unseen antigens is a legitimately strong result. Do not oversell the gap.
 - caveat worth stating in the paper: Arm A holds out 3 specific antigens (seed 0). Different held-out antigens would give a different gap, since antigens vary in how far they sit from the training distribution. A multi-seed version would put an interval on the +0.0353 rather than a single point estimate — not run here (each arm is a full training run).
-- artifact: `reports/controls_antibody.json` in the antibody repo (uncommitted).
+- artifact: `reports/controls_antibody.json` in the antibody repo.
 
 ## Random-gene control (Study 3)
 - 100 random 25-gene panels, external AUC: mean 0.587, sd 0.122, range 0.311–0.879
@@ -63,7 +63,7 @@ the random split scores higher, i.e. it flatters the model.
 
 - one-line reading: **yes — and more than "most".** The top gene alone (**LRRN3**, probe `11741013_a_at`, F = 74.8) reaches external AUC 0.962, *higher* than the 25-gene panel's 0.811, and AUC decreases monotonically as k grows. The 25-gene panel is not adding signal; it is diluting it.
 - important caveat, do not overclaim: at k = 1 accuracy is only 0.522 despite AUC 0.962. **I verified the cause directly rather than assuming it** — the k=1 model predicts *all 23* external samples as "old" (predicted-class counts `[0, 23]`; accuracy 12/23 = 0.5217 is just the external class balance). Its probabilities are squeezed into 0.5029–0.6761, i.e. entirely above the 0.5 cut, because `LogisticRegression(C=0.01)` heavily L2-shrinks the lone coefficient (−0.207). So the ranking is near-perfect while the threshold is inert. The honest claim is **"one gene carries the discriminative signal"**, not "one gene is a working classifier" — as a deployable classifier at the default threshold it is useless, and it would need recalibration to be usable.
-- top ranked genes by F: LRRN3 (74.8), SLC4A10 (73.5), NT5E (62.5), CD248 (56.5), VCAN (48.0). None are in the pipeline's `KNOWN_MARKERS` set, which is itself worth a sentence in the paper.
+- top ranked genes by F: LRRN3 (74.8), SLC4A10 (73.5), NT5E (62.5), CD248 (56.5), VCAN (48.0). None of those five is in the pipeline's `KNOWN_MARKERS` set — but **KLRB1 (CD161) is**, ranked lower in the same panel (F = 28.1), and it declines with age. So the panel is not purely statistical: it independently recovers a canonical immunosenescence marker moving in the biologically expected direction, which is a stronger thing to say than "none of the top genes are known markers". Directions for all 25 are in `gene_directions.csv`.
 
 ## Bootstrap CIs
 | Task | AUC | 95% CI |
@@ -82,7 +82,7 @@ note: the first run of this code had a real bug — `pd.DataFrame({"mi": mi, "im
 silently reindexes to the union of the two Series' labels when they're sorted
 in different orders, so it was not actually selecting the top-25-by-mutual-
 information rows (it originally reported 0% in every family). Fixed in
-`controls_voice_antibody.py` to build the combined frame explicitly in `mi`'s
+`controls_voice.py` to build the combined frame explicitly in `mi`'s
 order, then re-ran. Numbers below are from the corrected run.
 
 | Family | Count in top 25 | Share |
@@ -148,7 +148,7 @@ the two small ones, is more credible than leading with the 0.24 alone.
 
 ## Renames
 - directories renamed: `svd-success`→`voice-disorder-svd`, `parkinsons-success`→`parkinsons-sakar`, `parkinsons-uci-fail`→`parkinsons-oxford-uci`, `voiced-fail`→`voice-disorder-voiced`, `coswara-fail`→`acute-illness-cross-corpus` (all via `git mv`, history preserved)
-- references updated in: top-level `README.md` results table, `DEVLOG.md`, and the `usage`/`warning` fields of all four `models/model_card.json` files (previously pointed at a stale `0N_name` numbering scheme, e.g. `04_parkinsons_sakar/predict.py`)
+- references updated in: top-level `README.md` results table and the `usage`/`warning` fields of all four `models/model_card.json` files (previously pointed at a stale `0N_name` numbering scheme, e.g. `04_parkinsons_sakar/predict.py`)
 - verification: `grep -rniE "success|fail"` across `*.py/*.md/*.json` (excluding `.venv`/`.git`/`external_datasets`) returns only legitimate prose ("failed to preprocess", "successfully preprocessed", the paper's narrative use of "success"/"failure" as findings) — no directory-name-shaped matches remain
 - antibody repo naming mismatch: confirmed — the repo title/URL says "influenza" but the dataset used throughout (per its own `README.md`) is **AVIDa-SARS-CoV-2**, and "variants" is misspelled as "varients" in the repo name. Checked whether "influenza" appears inside the repo's own tracked files (`*.py`, `*.md`, `*.json`, `*.txt`) — it does not; the repo's internal docs already correctly say SARS-CoV-2. So there is nothing to fix inside the repo; the mismatch is only in the external GitHub repo name/title, which per instructions I did not rename.
 
@@ -156,23 +156,29 @@ the two small ones, is more credible than leading with the 0.24 alone.
 - **Nothing.** All six controls across all three studies executed and produced real numbers. No slot in this document is filled with an estimate, an extrapolation, or a value copied from the paper.
 - Two things were deliberately *not* attempted, and are not required by the brief: (1) a multi-seed version of the antibody ablation, which would put an interval on the +0.0353 rather than a point estimate (each seed costs two full training runs); (2) re-bootstrapping the Sakar **per-record** metric, which is only needed if the paper keeps 0.83 in the table instead of moving to the per-speaker 0.850 (see the reconciliation above).
 
-## Uncommitted state
-Per instruction, **no commits were made to any repo in this pass.** Current state:
+## Where these live
+All three repos are committed and pushed. Note that two were renamed upstream
+during this work:
 
-| Repo | State |
-|---|---|
-| gene-expression | cloned fresh from the org; working tree dirty with `controls_immuno.py`, `results/controls_report.md`, `results/control_random_genes.csv`, `results/control_panel_size.csv`, `results/curves.json`, plus `data/` cache and `.venv/` |
-| antibody | working tree dirty with `controls_voice_antibody.py`, `reports/controls_antibody.json`, and `data/` (raw + processed splits) |
-| voice | working tree dirty with this file and the devlog assets |
-
-Caveat you should know about: the voice repo has **4 local commits on branch
-`controls-and-rename`** (the voice controls, the directory renames, the model-card
-path fixes, and the first draft of this file) that were made *before* the
-"don't commit" instruction. They are local only — nothing was pushed to any
-remote. Say the word and I will reset them, or leave the branch for you to
-review and decide.
+| Study | Repo | Artifacts |
+|---|---|---|
+| voice | `Can-AI-detect-health-conditions-from-someones-voice` | this file, `reports/controls_voice.md`, `reports/feature_importance_sakar.csv`, both `models/model_card.json` |
+| gene | `Can-AI-classify-immune-aging-immunosenescence--from-gene-expression` | `results/controls_report.md`, `control_random_genes.csv`, `control_panel_size.csv`, `curves.json`, `gene_directions.csv` |
+| antibody | `Can-a-model-predict-which-antibody-sequences-are-likely-to-bind-SARS-CoV-2-variants` | `reports/controls_antibody.json` |
 
 ## Reproducing this
-- gene: `python controls_immuno.py` from the gene-expression repo root (needs its `.venv`; GEO series are cached under `data/` after the first run)
-- voice: `python controls_voice_antibody.py voice` from the voice repo root
-- antibody: `python controls_voice_antibody.py antibody` from the antibody repo root — **but** on this machine it must be launched through a wrapper that calls `truststore.inject_into_ssl()` first, or the ESM-2 download fails with the misleading `Cannot send a request, as the client has been closed`. Data setup: the repo's `download_data.py` fails for the same TLS reason; the three source CSVs were fetched directly from the HF resolve URLs and then passed through the repo's own `build_processed_splits()`, so the processed splits are exactly what the repo would have produced.
+- **gene:** `python controls_immuno.py` from the repo root. GEO series download on first run and are cached under `data/` after that.
+- **voice:** `python controls_voice.py` from the repo root. Needs the feature CSVs under `external_datasets/`.
+- **antibody:** `python controls_antibody.py` from the repo root. Two full training runs, GPU-bound.
+
+Environment caveat, in case a re-run fails the same way: this machine sits behind
+a TLS-intercepting proxy whose CA certificate OpenSSL rejects ("Basic Constraints
+of CA cert not marked critical"). Every Hugging Face request fails as a result,
+surfacing as the misleading `Cannot send a request, as the client has been
+closed`. `controls_antibody.py` now calls `truststore.inject_into_ssl()` up
+front, which validates against the OS trust store instead — verification stays
+**on**, this is not a `verify=False` bypass. The repo's own `download_data.py`
+fails for the same reason and was not modified; the three source CSVs were
+fetched directly from the Hugging Face resolve URLs and then passed through the
+repo's own `build_processed_splits()`, so the processed splits are byte-for-byte
+what that script would have produced.
