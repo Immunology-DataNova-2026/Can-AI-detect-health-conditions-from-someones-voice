@@ -11,8 +11,9 @@
 The last column matters. These rows are not all the same kind of number: the two
 strong results aggregate each speaker's recordings into one decision, while the
 others are scored per recording. Quoting them side by side without saying so is
-what made the model cards disagree with the manuscript in the first place — see
-`CONTROLS_RESULTS.md`.
+how a model card ends up disagreeing with the text that cites it.
 
 Full-precision values, confusion matrices, and bootstrap CIs live in each task's
-`models/model_card.json`.
+`models/model_card.json`. Run any experiment with `python <folder>/pipeline.py`,
+score a new input with `python <folder>/predict.py`, and reproduce the control
+experiments with `python controls_voice.py`.
