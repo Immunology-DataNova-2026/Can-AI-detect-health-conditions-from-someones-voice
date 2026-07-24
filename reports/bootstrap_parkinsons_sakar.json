@@ -1,0 +1,79 @@
+{
+  "task": "parkinsons_sakar",
+  "evaluation": "GroupKFold(5) by speaker id, seed 42",
+  "bootstrap": {
+    "n_resamples": 2000,
+    "seed": 42,
+    "method": "percentile, paired over evaluation units"
+  },
+  "positive_class": "1 = parkinsons",
+  "confusion_order": "[[TN, FP], [FN, TP]] (scikit-learn order)",
+  "n_records": 755,
+  "n_speakers": 252,
+  "class_counts": {
+    "records": {
+      "neg": 192,
+      "pos": 563
+    },
+    "speakers": {
+      "neg": 64,
+      "pos": 188
+    }
+  },
+  "per_record": {
+    "auroc": 0.8386758066903492,
+    "auroc_ci95": [
+      0.8068828307595919,
+      0.8687366879955782
+    ],
+    "auroc_bootstrap_mean": 0.8386992006003063,
+    "auroc_bootstrap_sd": 0.016107322532561495,
+    "accuracy": 0.8158940397350993,
+    "accuracy_ci95": [
+      0.7880794701986755,
+      0.8437086092715231
+    ],
+    "accuracy_bootstrap_mean": 0.8160655629139073,
+    "accuracy_bootstrap_sd": 0.014043979348596093,
+    "n_valid_resamples": 2000,
+    "confusion": [
+      [
+        106,
+        86
+      ],
+      [
+        53,
+        510
+      ]
+    ]
+  },
+  "per_speaker": {
+    "auroc": 0.8499418218085106,
+    "auroc_ci95": [
+      0.7957590305129323,
+      0.9013907248529379
+    ],
+    "auroc_bootstrap_mean": 0.8511913118738009,
+    "auroc_bootstrap_sd": 0.027164970577274197,
+    "accuracy": 0.8214285714285714,
+    "accuracy_ci95": [
+      0.7737103174603175,
+      0.8690476190476191
+    ],
+    "accuracy_bootstrap_mean": 0.8217361111111111,
+    "accuracy_bootstrap_sd": 0.024867730631258335,
+    "n_valid_resamples": 2000,
+    "confusion": [
+      [
+        35,
+        29
+      ],
+      [
+        16,
+        172
+      ]
+    ],
+    "sensitivity": 0.9148936170212766,
+    "specificity": 0.546875
+  }
+}
